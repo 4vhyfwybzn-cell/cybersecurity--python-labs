@@ -15,7 +15,7 @@ class User:
         self, username: str, email: str, role: str = "user", active: bool = True
     ):
         self.username = username
-        self.email = email  # через сеттер у property
+        self.email = email
         self.role = role
         self.active = active
         self.__password_hash: bytes | None = None
@@ -27,7 +27,6 @@ class User:
 
     @email.setter
     def email(self, value: str) -> None:
-        # Проста валідація email: локальна частина (3-64 латинські літери, цифри, крапки, дефіси), потім @ та домен з крапкою
         pattern = r"^[a-zA-Z][a-zA-Z0-9_.]{2,63}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(pattern, value):
             raise ValueError(f"Некоректний формат email: {value}")
@@ -147,7 +146,6 @@ class UserAccount:
         if self.session.is_active():
             return True
         else:
-            # Час вийшов
             self.session = None
             return False
 

@@ -1,11 +1,3 @@
-# labs/lab01/task3.py
-"""Модуль криптографічного захисту даних, автентифікації та аудиту подій.
-
-Забезпечує безпечне хешування паролів за стандартом SHA3-256 із застосуванням солі,
-ведення локальної бази користувачів у CSV-форматі та декорування процесів
-для логування результатів входу до JSON-файлу безпеки.
-"""
-
 import csv
 import datetime
 import hashlib
@@ -14,44 +6,24 @@ import os
 
 
 class ValidationError(Exception):
-    """Кастомний виняток для фіксації помилок валідації параметрів безпеки."""
-
+    pass
 
 
 def generate_hash(password: str, salt: str = "00000") -> str:
-    """Генерує безпечний криптографічний хеш за стандартом SHA3-256.
-
-    Додає статичну або динамічну сіль до пароля для захисту від атак
-    за райдужними таблицями та перевіряє мінімальну довжину.
-
-    Args:
-        password (str): Пароль користувача у відкритому вигляді.
-        salt (str): Рядок солі для посилення стійкості хешу.
-
-    Returns:
-        str: Шістнадцяткове представлення отриманого хеш-значення.
-
-    Raises:
-        ValueError: Якщо передано порожній пароль або сіль.
-        ValidationError: Якщо пароль коротший за 16 символів (Вимога Варіанту 5).
-    """
     if not password or not salt:
         raise ValueError("Пароль або сіль не можуть бути порожніми!")
 
     if len(password) < 16:
-        raise ValidationError("Пароль занадто короткий для Варіанту 5 (мінімум 16 символів)!")
+        raise ValidationError(
+            "Пароль занадто короткий для Варіанту 5 (мінімум 16 символів)!"
+        )
 
     # Конкатенація пароля та солі перед процедурою хешування
     salted_password = password + salt
-    return hashlib.sha3_256(salted_password.encode('utf-8')).hexdigest()
+    return hashlib.sha3_256(salted_password.encode("utf-8")).hexdigest()
 
 
 def log_event(func):
-    """Декоратор для автоматичного логування спроб автентифікації користувачів.
-
-    Фіксує успішні та невдалі входи, часові мітки у форматі UTC, а також
-    передані аргументи з подальшим записом аудиторського сліду в JSON-лог.
-    """
 
     def wrapper(*args, **kwargs):
         # Визначення імені користувача з позиційних або іменованих аргументів
@@ -74,9 +46,11 @@ def log_event(func):
                 "event": "login",
                 "user": username,
                 "result": status,
-                "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
                 "args": list(args),
-                "kwargs": kwargs
+                "kwargs": kwargs,
             }
 
             # Читання існуючих логів для запобігання перезапису даних
@@ -98,26 +72,12 @@ def log_event(func):
 
 
 def create_user(username: str, password: str) -> tuple:
-    """Створює новий профіль користувача з обчисленим хешем та сіллю.
-
-    Args:
-        username (str): Логін нового користувача.
-        password (str): Стійкий пароль користувача.
-
-    Returns:
-        tuple: Кортеж формату (логін, хеш_пароля).
-    """
-    salt = "00005"  # Персоналізована сіль для Варіанту №5
+    salt = "00005"  # Персоналізована сіль
     hash_value = generate_hash(password, salt)
     return (username, hash_value)
 
 
 def create_users(users_list: list):
-    """Експортує список облікових записів у локальну базу даних CSV.
-
-    Args:
-        users_list (list): Список кортежів з сирими даними (логін, пароль).
-    """
     data_dir = os.path.join("labs", "lab01", "data")
     os.makedirs(data_dir, exist_ok=True)
     csv_path = os.path.join(data_dir, "users.csv")
@@ -136,11 +96,6 @@ def create_users(users_list: list):
 
 
 def read_users_db() -> list:
-    """Імпортує та парсить базу даних користувачів із файлу CSV.
-
-    Returns:
-        list: Список рядків таблиці з логінами та відповідними хешами.
-    """
     csv_path = os.path.join("labs", "lab01", "data", "users.csv")
     users_db = []
     if not os.path.exists(csv_path):
@@ -157,20 +112,11 @@ def read_users_db() -> list:
 
 @log_event
 def login(username: str, password: str) -> bool:
-    """Автентифікує користувача в системі шляхом порівняння згенерованих хешів.
-
-    Args:
-        username (str): Логін, що вводиться.
-        password (str): Пароль, що вводиться.
-
-    Returns:
-        bool: True, якщо облікові дані вірні та валідні; False в іншому випадку.
-    """
     if not username or not password:
         raise ValueError("Поля логіна та пароля не можуть бути порожніми!")
 
     users_db = read_users_db()
-    salt = "00005"  # Сіль відповідного варіанту перевірки
+    salt = "00005"  # Сіль перевірки
 
     try:
         current_hash = generate_hash(password, salt)
@@ -185,14 +131,13 @@ def login(username: str, password: str) -> bool:
 
 
 def run_task3_demo():
-    """Запускає повний демонстраційний цикл перевірки модулів підсистеми автентифікації."""
     print("\n--- Виконання Завдання 3 ---")
 
-    # Список тестових користувачів (враховуючи валідні та невалідні довжини паролів)
+    # Список тестових користувачів
     test_users = [
         ("admin_cyber", "SuperSecurePassword2026!"),
         ("user_test", "ShortPwd1"),
-        ("analyst_5", "QuantumEncryptionKey#5")
+        ("analyst_5", "QuantumEncryptionKey#5"),
     ]
 
     print("Реєстрація та запис користувачів у CSV...")
@@ -204,10 +149,10 @@ def run_task3_demo():
         print(f"Логін: {row[0]:<15} | Хеш: {row[1]}")
 
     print("\nТестування автентифікації (Логування в JSON):")
-    # Тест 1: Перевірка входу з коректними даними
+    # Перевірка входу з коректними даними
     res1 = login("admin_cyber", "SuperSecurePassword2026!")
     print(f"Спроба для 'admin_cyber' (правильний): {res1}")
 
-    # Тест 2: Перевірка стійкості до некоректного пароля
+    # Перевірка стійкості до некоректного пароля
     res2 = login("admin_cyber", "WrongPassword123456789")
     print(f"Спроба для 'admin_cyber' (неправильний): {res2}")

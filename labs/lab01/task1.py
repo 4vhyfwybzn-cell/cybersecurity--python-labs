@@ -1,10 +1,3 @@
-# labs/lab01/task1.py
-"""Модуль для комплексного аналізу надійності паролів.
-
-Забезпечує перевірку паролів на відповідність безпековим критеріям,
-враховує унікальність, довжину та наявність обов'язкових символів.
-"""
-
 import os
 import random
 import sys
@@ -17,17 +10,6 @@ from shared.student import GROUP_NAME, STUDENT_NAME, VARIANT_NUMBER
 
 
 def check_password_strength(password, criteria, forbidden, all_passwords):
-    """Визначає рівень безпеки пароля на основі заданих критеріїв.
-
-    Args:
-        password (str): Пароль для аналізу.
-        criteria (dict): Словник із критеріями мінімальної довжини.
-        forbidden (set): Набір скомпрометованих/заборонених паролів.
-        all_passwords (list): Повний список паролів для оцінки унікальності.
-
-    Returns:
-        str: Текстовий статус надійності пароля.
-    """
     min_length = criteria["min_length"]
 
     # Перевірка на присутність у чорному списку або недостатню довжину
@@ -46,7 +28,6 @@ def check_password_strength(password, criteria, forbidden, all_passwords):
 
     # Класифікація рівня складності пароля
     if matched_criteria == 4:
-        # Пароль вважається унікальним, якщо він зустрічається у списку лише 1 раз
         is_unique = all_passwords.count(password) == 1
         if len(password) >= min_length + 4 and is_unique:
             return "Дуже сильний"
@@ -57,13 +38,12 @@ def check_password_strength(password, criteria, forbidden, all_passwords):
 
 
 def main():
-    """Головна функція програми для запуску демонстрації аналізу паролів."""
     # Виведення інформаційного заголовка з даними студента
     print("=" * 60)
     print(f"Студент: {STUDENT_NAME} | Група: {GROUP_NAME} | Варіант: {VARIANT_NUMBER}")
     print("=" * 60)
 
-    # Початковий масив тестових паролів для Варіанту №5
+    # Початковий масив тестових паролів
     passwords = [
         "DataS3cur3!",
         "123",
@@ -91,7 +71,7 @@ def main():
     # Створення робочої копії списку для моделювання повторного використання
     working_passwords = passwords.copy()
 
-    # Симуляція повторного використання: додаємо 3 випадкові паролі з наявних
+    # Симуляція повторного використання
     for _ in range(3):
         random_pwd = random.choice(passwords)
         working_passwords.append(random_pwd)

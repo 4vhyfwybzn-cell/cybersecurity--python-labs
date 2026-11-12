@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-# Налаштування логування
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -56,7 +55,6 @@ class ServiceAvailabilityScanner:
 
         ext = self.targets_path.suffix.lower()
 
-        # Безпечна обробка JSON
         if ext == ".json":
             try:
                 with open(self.targets_path, "r", encoding="utf-8") as f:
