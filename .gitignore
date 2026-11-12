@@ -232,4 +232,4 @@ __pycache__/
 .DS_Store
 
 # Локальні бази даних та логи лабораторної (щоб не смітити на GitHub)
-labs/lab01/data/
+labs/lab03/data/*.sqlite3
