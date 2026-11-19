@@ -1,4 +1,3 @@
-import sqlite3
 from contextlib import closing
 from typing import Any
 
@@ -20,16 +19,12 @@ def create_category(name: str) -> dict[str, Any]:
 
 
 def delete_category(category_id: int) -> bool:
-    with closing(get_connection()) as conn:
-        try:
-            with conn:
-                cursor = conn.execute(
-                    "DELETE FROM categories WHERE id = ?", (category_id,)
-                )
-                return cursor.rowcount > 0
-        except sqlite3.IntegrityError:
-            # Непорожня категорія або помилка зв'язків
-            raise
+    with closing(get_connection()) as conn, conn:
+        cursor = conn.execute(
+            "DELETE FROM categories WHERE id = ?",
+            (category_id,),
+        )
+        return cursor.rowcount > 0
 
 
 def get_record_by_id(record_id: int) -> dict[str, Any] | None:
@@ -58,45 +53,43 @@ def get_record_by_id(record_id: int) -> dict[str, Any] | None:
 
 
 def create_record(data: dict) -> dict[str, Any]:
-    with closing(get_connection()) as conn:
-        with conn:
-            cursor = conn.execute(
-                """
+    with closing(get_connection()) as conn, conn:
+        cursor = conn.execute(
+            """
                 INSERT INTO records (code, title, category_id, value, status)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (
-                    data["code"],
-                    data["title"],
-                    data["category_id"],
-                    data["value"],
-                    data["status"],
-                ),
-            )
-            rec_id = cursor.lastrowid
+            (
+                data["code"],
+                data["title"],
+                data["category_id"],
+                data["value"],
+                data["status"],
+            ),
+        )
+        rec_id = cursor.lastrowid
     return get_record_by_id(rec_id)
 
 
 def update_record(record_id: int, data: dict) -> dict[str, Any] | None:
-    with closing(get_connection()) as conn:
-        with conn:
-            cursor = conn.execute(
-                """
+    with closing(get_connection()) as conn, conn:
+        cursor = conn.execute(
+            """
                 UPDATE records 
                 SET code = ?, title = ?, category_id = ?, value = ?, status = ?
                 WHERE id = ?
                 """,
-                (
-                    data["code"],
-                    data["title"],
-                    data["category_id"],
-                    data["value"],
-                    data["status"],
-                    record_id,
-                ),
-            )
-            if cursor.rowcount == 0:
-                return None
+            (
+                data["code"],
+                data["title"],
+                data["category_id"],
+                data["value"],
+                data["status"],
+                record_id,
+            ),
+        )
+        if cursor.rowcount == 0:
+            return None
     return get_record_by_id(record_id)
 
 
